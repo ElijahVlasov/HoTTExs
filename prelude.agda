@@ -68,7 +68,6 @@ invʳ {p = refl} = refl
 ap : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} {x y : A} (f : A → B) (p : x ≡ y) → f x ≡ f y
 ap f refl = refl
 
-
 cancelʳ : ∀ {ℓ} {A : Set ℓ} {x y z : A} {p₁ p₂ : x ≡ y} {q : y ≡ z}
   → p₁ ∙ q ≡ p₂ ∙ q → p₁ ≡ p₂
 cancelʳ {p₁ = p₁} {p₂ = p₂} {q = q} α = (~ idʳ) ∙ (ap (_∙_ p₁) (~ invʳ {p = q}) ∙ (
@@ -108,6 +107,11 @@ transportconst : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} {x y : A}
   (p : x ≡ y) (b : B) → transp p b ≡ b
 transportconst refl b = refl
 
+transp-p-~p : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂}
+  → {x y : A} → (p : x ≡ y) {u : P y}
+    → transp {P = P} p (transp {P = P} (~ p) u) ≡ u
+transp-p-~p refl = refl
+
 transp-back : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂}
   → {x y : A} → (p : x ≡ y) (u : P x) (v : P y)
     → transp p u ≡ v → transp (~ p) v ≡ u
@@ -123,6 +127,22 @@ transp-back∘transp-forth : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set
     → ∀ (γ : transp (~ p) v ≡ u) → transp-back p u v (transp-forth p u v γ) ≡ γ
 transp-back∘transp-forth {p = refl} γ = ~~-id
 
+transp-ap : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : Set ℓ₂} {P : B → Set ℓ₃} {x y : A}
+  {p : x ≡ y} {f : A → B} {u : P (f x)} → (transp {P = λ x → P (f x)} p u) ≡ transp {P = P} (ap f p) u
+transp-ap {p = refl} = refl
+
+transp-∙ : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂} {x y z : A}
+  {p : x ≡ y} {q : y ≡ z} {u : P x} → (transp q (transp {P = P} p u)) ≡ (transp {P = P} (p ∙ q) u)
+transp-∙ {p = refl} {refl} = refl
+
+transp-equal-paths : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂}
+  → {x y : A} → {p q : x ≡ y} → (α : p ≡ q) {u : P x}
+    → transp {P = P} p u ≡ transp {P = P} q u
+transp-equal-paths refl = refl
+
+apd : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂} {x y : A} (f : ∀ x → P x)
+  → (p : x ≡ y) → transp p (f x) ≡ f y
+apd f refl = refl
 
 data Σ {ℓ₁ ℓ₂} (A : Set ℓ₁) (B : A → Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where
   _,_ : (x : A) (y : B x) → Σ A B
@@ -154,6 +174,11 @@ data ℕ : Set where
 data _⊎_ {ℓ₁ ℓ₂} (A : Set ℓ₁) (B : Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where
   inl : A → A ⊎ B
   inr : B → A ⊎ B
+
+rec-⊎ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : Set ℓ₂} {C : Set ℓ₃}
+  → (A → C) → (B → C) → (A ⊎ B → C)
+rec-⊎ f g (inl x) = f x
+rec-⊎ f g (inr x) = g x
 
 𝟚 = 𝟙 ⊎ 𝟙
 
