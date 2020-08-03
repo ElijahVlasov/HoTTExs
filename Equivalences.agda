@@ -14,6 +14,9 @@ record ishae {ℓ} {A B : Set ℓ} (f : A → B) : Set ℓ where
     ε : f ∘ g == id
     τ : ∀ (x : A) → ap f (η x) ≡ ε (f x)
 
+isContrFibers : ∀ {ℓ₁} {A B : Set ℓ₁} → (A → B) → Set ℓ₁
+isContrFibers {A = A} {B = B} f = ∀ (b : B) → isContr (fib f b)
+
 linv' : ∀ {ℓ} {A B : Set ℓ} (f : A → B)
     → Set ℓ
 linv' {A = A} {B = B} f = Σ (B → A) (λ r → r ∘ f == id)
@@ -26,14 +29,14 @@ rinv' {A = A} {B = B} f = Σ (B → A) (λ s → f ∘ s == id)
 linv'≅linv : ∀ {ℓ} {A B : Set ℓ} {f : A → B}
   → linv' f ≅ linv f
 linv'≅linv {f = f} = (λ { (r , p) → record { r = r ; r∘f = p } }) ,
-                     quasi-isequiv _ (record { g = λ { record { r = r ; r∘f = r∘f } → r , r∘f } ;
+                     quasi-isequiv (record { g = λ { record { r = r ; r∘f = r∘f } → r , r∘f } ;
                                                g∘f = λ { (r , p) → refl } ;
                                                f∘g = λ { record { r = r ; r∘f = r∘f } → refl } })
 
 rinv'≅rinv : ∀ {ℓ} {A B : Set ℓ} {f : A → B}
   → rinv' f ≅ rinv f
 rinv'≅rinv {f = f} = (λ { (s , p) → record { s = s ; f∘s = p } }) ,
-                     quasi-isequiv _ (record { g = λ { record { s = s ; f∘s = f∘s } → s , f∘s } ;
+                     quasi-isequiv (record { g = λ { record { s = s ; f∘s = f∘s } → s , f∘s } ;
                                                g∘f = λ { (s , p) → refl } ;
                                                f∘g = λ { record { s = s ; f∘s = f∘s } → refl} })
 
@@ -66,7 +69,7 @@ fib-paths {A = A} {B = B} f y (x , p) (x' , p') = ≅-trans Σ-paths ((λ { (q ,
                                                                                                                    p
                                                                                                                    p'
                                                                                                                    w) }) ,
-                                                           quasi-isequiv _ (record { g = λ { (q , w) → q ,
+                                                           quasi-isequiv (record { g = λ { (q , w) → q ,
                                                                                                        (transp-forth q
                                                                                                                      p
                                                                                                                      p'
@@ -144,13 +147,13 @@ module isequivprop {ℓ} (extensionality : funext-axiom {ℓ₁ = ℓ} {ℓ₂ =
   quasi-linv'-contr {A = A} {B = B} f e = isContr-≅ (≅-sym linv'≅fib) (quiv-contractible-fibers (λ h → h ∘ f) (precomp-quasi f e A) id) 
     where
       linv'≅fib : linv' f ≅ fib (λ (g : B → A) → g ∘ f) id
-      linv'≅fib = (λ { (r , p) → r , funext p }) , quasi-isequiv _ (record { g = λ { (r , p) → r , happly p } ;
-                                                                              g∘f = λ { (r , p) → isequiv.left (proj₂ Σ-paths)
+      linv'≅fib = (λ { (r , p) → r , funext p }) , quasi-isequiv (record { g = λ { (r , p) → r , happly p } ;
+                                                                            g∘f = λ { (r , p) → isequiv.left (proj₂ Σ-paths)
                                                                                                                 (refl ,
                                                                                                                  quasiinv.f∘g
                                                                                                                    funext-quasi p
                                                                                                                    ) } ;
-                                                                              f∘g = λ { (r , p) → isequiv.left (proj₂ Σ-paths)
+                                                                            f∘g = λ { (r , p) → isequiv.left (proj₂ Σ-paths)
                                                                                                                 (refl ,
                                                                                                                 (quasiinv.g∘f
                                                                                                                   funext-quasi p)) } })
@@ -165,10 +168,10 @@ module isequivprop {ℓ} (extensionality : funext-axiom {ℓ₁ = ℓ} {ℓ₂ =
     where
       rinv'≅fib : rinv' f ≅ fib (λ (g : B → A) → f ∘ g) id
       rinv'≅fib = (λ { (s , p) → s , (funext p) }) ,
-                  quasi-isequiv _ (record { g = λ { (r , p) → r , (happly p) } ;
-                                            g∘f = λ { (s , p) → isequiv.left (proj₂ Σ-paths) (refl , (quasiinv.f∘g
-                                                                                                        funext-quasi p))} ;
-                                            f∘g = λ { (s , p) → isequiv.left (proj₂ Σ-paths) (refl , (quasiinv.g∘f
+                  quasi-isequiv (record { g = λ { (r , p) → r , (happly p) } ;
+                                          g∘f = λ { (s , p) → isequiv.left (proj₂ Σ-paths) (refl , (quasiinv.f∘g
+                                                                                                      funext-quasi p))} ;
+                                          f∘g = λ { (s , p) → isequiv.left (proj₂ Σ-paths) (refl , (quasiinv.g∘f
                                                                                                                   funext-quasi p))} })
 
   quasi-rinv-contr : ∀ {A B : Set ℓ} (f : A → B) (e : quasiinv f)
@@ -182,7 +185,6 @@ module isequivprop {ℓ} (extensionality : funext-axiom {ℓ₁ = ℓ} {ℓ₂ =
                                                                        (quasi-rinv-contr f (isequiv-quiv f e)))) e
 
 open isequivprop public
-
 
    {-test : ∀ (q : f x ≡ y) → (~ (~ idˡ)) ∙
                transp-back refl (proj₂ (x , (ap f refl ∙ q))) q

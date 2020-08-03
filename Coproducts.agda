@@ -11,7 +11,7 @@ module LeftCode {ℓ} {A B : Set ℓ} (a₀ : A) where
   codeˡ  (inr b) = Lift ℓ 𝕆
 
   ⊎-pathsˡ : ∀ (x : A ⊎ B) → (inl a₀) ≡ x ≅ codeˡ x
-  ⊎-pathsˡ x = encode x , quasi-isequiv _ (record { g = decode x ; g∘f = decode∘encode x ; f∘g = encode∘decode x })
+  ⊎-pathsˡ x = encode x , quasi-isequiv (record { g = decode x ; g∘f = decode∘encode x ; f∘g = encode∘decode x })
     where
       encode : ∀ (x : A ⊎ B) (p : (inl a₀) ≡ x) → codeˡ x
       encode x p = transp {P = codeˡ} p refl
@@ -35,7 +35,7 @@ module RightCode {ℓ} {A B : Set ℓ} (b₀ : B) where
   codeʳ (inr b) = b₀ ≡ b
 
   ⊎-pathsʳ : ∀ (x : A ⊎ B) → (inr b₀) ≡ x ≅ codeʳ x
-  ⊎-pathsʳ x = encode x , quasi-isequiv _ (record { g = decode x ; g∘f = decode∘encode x ; f∘g = encode∘decode x })
+  ⊎-pathsʳ x = encode x , quasi-isequiv (record { g = decode x ; g∘f = decode∘encode x ; f∘g = encode∘decode x })
     where
       encode : ∀ (x : A ⊎ B) (p : (inr b₀) ≡ x) → codeʳ x
       encode x p = transp {P = codeʳ} p refl

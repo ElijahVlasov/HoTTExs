@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --rewriting #-}
+{-# OPTIONS --without-K #-}
 
 module UnivalenceRule where
 
@@ -25,9 +25,9 @@ module UnivalenceFromPropUnivRule where
           𝕁ᵘ C t A A ≅-refl ≡ t A
 
   univ-axiom : ∀ ℓ → isUnivalent ℓ
-  univ-axiom ℓ A B = quasi-isequiv (idtoeqv A B) (record { g = λ { (lift e) → 𝕁ᵘ (λ A B _ → A ≡ B) (λ A → refl) A B e } ;
-                                               g∘f = λ { refl → 𝕁ᵘ-β } ;
-                                               f∘g = λ { (lift e) → 𝕁ᵘ (λ A' B' e' → idtoeqv A' B' (𝕁ᵘ (λ A B _ → A ≡ B)
+  univ-axiom ℓ A B = quasi-isequiv  (record { g = λ { (lift e) → 𝕁ᵘ (λ A B _ → A ≡ B) (λ A → refl) A B e } ;
+                                              g∘f = λ { refl → 𝕁ᵘ-β } ;
+                                              f∘g = λ { (lift e) → 𝕁ᵘ (λ A' B' e' → idtoeqv A' B' (𝕁ᵘ (λ A B _ → A ≡ B)
                                                                                          (λ A → refl) A' B' e') ≡ lift e')
                                                                        (λ A → ap (idtoeqv A A) 𝕁ᵘ-β)
                                                                        A

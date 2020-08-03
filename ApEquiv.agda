@@ -58,7 +58,7 @@ module ApAux {ℓ} {A B : Set ℓ} {f : A → B} (e : quasiinv f) {x y : A} (p :
 
 ap-equiv : ∀ {ℓ} {A B : Set ℓ} (f : A → B) (e : quasiinv f)
   → ∀ (x y : A) → isequiv (ap {x = x} {y = y} f)
-ap-equiv {A = A} {B = B} f e x y = quasi-isequiv _ (record {
+ap-equiv {A = A} {B = B} f e x y = quasi-isequiv (record {
                                     g = λ q → (~ (quasiinv.g∘f e) x) ∙ (ap (quasiinv.g e) q ∙ (quasiinv.g∘f e) y) ; -- (~ (quasiinv.g∘f e) x) ∙ (ap (quasiinv.g e) q ∙ (quasiinv.g∘f e) y) ;
                                     g∘f = λ { refl → ap (_∙_ (~ quasiinv.g∘f e x)) idˡ ∙ invˡ } ;
                                     f∘g = λ p → ~ (ApAux.equality₁ e p ∙

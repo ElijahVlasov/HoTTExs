@@ -4,7 +4,7 @@ module prelude where
 
 open import Agda.Primitive public using (Level; lzero; lsuc; _⊔_; Setω) 
 
-_∘_ : ∀ {ℓ} {A B C : Set ℓ}
+_∘_ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : Set ℓ₂} {C : Set ℓ₃}
   → (B → C) → (A → B) → (A → C)
 g ∘ f = λ x → g (f x)
 
@@ -265,8 +265,8 @@ record isequiv {ℓ} {A B : Set ℓ} (f : A → B) : Set ℓ where
     right : B → A
     right∘f : right ∘ f == id
 
-quasi-isequiv : ∀ {ℓ} {A B : Set ℓ} (f : A → B) → quasiinv f → isequiv f
-quasi-isequiv f record { g = g ; g∘f = g∘f ; f∘g = f∘g } = record { left = g ; f∘left = f∘g ; right = g ; right∘f = g∘f }
+quasi-isequiv : ∀ {ℓ} {A B : Set ℓ} {f : A → B} → quasiinv f → isequiv f
+quasi-isequiv record { g = g ; g∘f = g∘f ; f∘g = f∘g } = record { left = g ; f∘left = f∘g ; right = g ; right∘f = g∘f }
 
 isequiv-quiv : ∀ {ℓ} {A B : Set ℓ} (f : A → B) → isequiv f → quasiinv f
 isequiv-quiv f record { left = left ;
@@ -297,7 +297,7 @@ id-isequiv = record { left = id ;
 ≅-sym (f , e)   with (isequiv-quiv f e)
 ≅-sym (f , e)   | record { g = g ;
                            g∘f = g∘f ;
-                           f∘g = f∘g } = g , (quasi-isequiv g (record { g = f ;
+                           f∘g = f∘g } = g , (quasi-isequiv (record { g = f ;
                                                                         g∘f = f∘g ;
                                                                         f∘g = g∘f }))
 
@@ -307,7 +307,7 @@ id-isequiv = record { left = id ;
                                       g∘f = g₁∘f₁ ;
                                       f∘g = f₁∘g₁ } | record { g = g₂ ;
                                                               g∘f = g₂∘f₂ ;
-                                                              f∘g = f₂∘g₂ } = f₂ ∘ f₁ , quasi-isequiv _
+                                                              f∘g = f₂∘g₂ } = f₂ ∘ f₁ , quasi-isequiv
                                                                                                       (record { g = g₁ ∘ g₂ ;
                                                                                                                 g∘f = λ x →
                                                                                                                   ap g₁ (g₂∘f₂ (f₁ x)) ∙
@@ -339,7 +339,7 @@ isequiv-linv-rinv f = (λ e → (record { r = isequiv.right e ;
                                         r∘f = isequiv.right∘f e}) ,
                                record { s = isequiv.left e ;
                                         f∘s = isequiv.f∘left e }) ,
-                      quasi-isequiv _ (record { g = λ { (linvf , rinvf) → record { left = rinv.s rinvf ;
+                      quasi-isequiv (record { g = λ { (linvf , rinvf) → record { left = rinv.s rinvf ;
                                                                                     f∘left = rinv.f∘s rinvf ;
                                                                                     right = linv.r linvf ;
                                                                                     right∘f = linv.r∘f linvf } } ;
@@ -368,7 +368,7 @@ isContr' A = Σ A (λ x → ∀ (y : A) → x ≡ y)
 isContr≅isContr' : ∀ {ℓ} {A : Set ℓ} → isContr A ≅ isContr' A
 isContr≅isContr' = (λ { record { center = center ;
                                  contr = contr } → center , contr }) ,
-                   quasi-isequiv _ (record { g = λ { (x , y) → record { center = x ; contr = y } };
+                   quasi-isequiv (record { g = λ { (x , y) → record { center = x ; contr = y } };
                                              g∘f = λ { record { center = center ; contr = contr } → refl } ;
                                              f∘g = λ { (x , y) → refl} })
 

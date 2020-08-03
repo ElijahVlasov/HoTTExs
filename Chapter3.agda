@@ -3,6 +3,7 @@
 module Chapter3 where
 
 open import prelude
+open import Inspect
 open import ApEquiv
 open import Coproducts
 open import Equivalences
@@ -78,9 +79,9 @@ module Ex34 (funext : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂
   isPropA≅A→isContrA : ∀ {ℓ} {A : Set ℓ} → isProp A ≅ (A → isContr A)
   isPropA≅A→isContrA = (λ isPropA → λ a → record { center = a ;
                                                      contr = λ x → isPropA a x }) ,
-                        quasi-isequiv _ (record { g = λ q → λ x y → (~ (isContr.contr (q x) x)) ∙ isContr.contr (q x) y ;
-                                                  g∘f = λ isPropA → isProp-isProp funext _ _ ;
-                                                  f∘g = λ f →  funext λ x →  isProp-isContr _ _ })
+                        quasi-isequiv (record { g = λ q → λ x y → (~ (isContr.contr (q x) x)) ∙ isContr.contr (q x) y ;
+                                                g∘f = λ isPropA → isProp-isProp funext _ _ ;
+                                                f∘g = λ f →  funext λ x →  isProp-isContr _ _ })
 
 -- Ex 3.6
 
@@ -106,10 +107,11 @@ module Ex34 (funext : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂
 module Ex38  (e : ∀ {ℓ} {A B : Set ℓ} → (A → B) → Set ℓ)
             (iseq : isequiv-conditions e) where
   ∥quiv∥-to-e : ∀ {ℓ} {A B : Set ℓ} (f : A → B) → ∥ quasiinv f ∥ → e f
-  ∥quiv∥-to-e f quivf = ∥∥-rec (isequiv-conditions.from-quiv iseq f) (isequiv-conditions.e-isProp iseq f) quivf
+  ∥quiv∥-to-e f = ∥∥-rec (isequiv-conditions.from-quiv iseq f) (isequiv-conditions.e-isProp iseq f) 
+  --∥∥-rec (isequiv-conditions.from-quiv iseq f) (isequiv-conditions.e-isProp iseq f) quivf
 
   e-to-∥quiv∥ : ∀ {ℓ} {A B : Set ℓ} (f : A → B) → e f → ∥ quasiinv f ∥
-  e-to-∥quiv∥ f ef = ⟦ isequiv-conditions.to-quiv iseq f ef ⟧
+  e-to-∥quiv∥ f ef = ⟦ isequiv-conditions.to-quiv iseq f ef ⟧ -- ⟦ isequiv-conditions.to-quiv iseq f ef ⟧
 
   ∥quiv∥-to-e∘e-to-∥quiv∥ : ∀ {ℓ} {A B : Set ℓ} (f : A → B) → (∥quiv∥-to-e f) ∘ (e-to-∥quiv∥ f) == id
   ∥quiv∥-to-e∘e-to-∥quiv∥ f x = isequiv-conditions.e-isProp iseq f _ _
@@ -118,9 +120,9 @@ module Ex38  (e : ∀ {ℓ} {A B : Set ℓ} → (A → B) → Set ℓ)
   e-to-∥quiv∥∘∥quiv∥-to-e f x = ∥∥-prop _ _
 
   quasiinv≅iseq : ∀ {ℓ} {A B : Set ℓ} {f : A → B} → ∥ quasiinv f ∥ ≅ e f
-  quasiinv≅iseq {f = f} = ∥quiv∥-to-e f , quasi-isequiv _ (record { g = e-to-∥quiv∥ f ;
-                                                                   g∘f = e-to-∥quiv∥∘∥quiv∥-to-e f ;
-                                                                   f∘g = ∥quiv∥-to-e∘e-to-∥quiv∥ f })
+  quasiinv≅iseq {f = f} = ∥quiv∥-to-e f , quasi-isequiv (record { g = e-to-∥quiv∥ f ;
+                                                                 g∘f = e-to-∥quiv∥∘∥quiv∥-to-e f ;
+                                                                 f∘g = ∥quiv∥-to-e∘e-to-∥quiv∥ f })
 
 -- Ex 3.9
 
@@ -129,7 +131,7 @@ module Ex39 {ℓ} (univalence : isUnivalent ℓ)
                                                        → (∀ (x : A) → f x ≡ g x) → f ≡ g) where
 
   LEM-Prop : LEM ℓ → hProp ℓ ≅ (Lift (lsuc ℓ) 𝟚)
-  LEM-Prop LEM = f , (quasi-isequiv _ (record { g = g ; g∘f = g∘f ; f∘g = f∘g }))
+  LEM-Prop LEM = f , (quasi-isequiv (record { g = g ; g∘f = g∘f ; f∘g = f∘g }))
     where
       true-or-false : (A : Set ℓ) → isProp A → 𝟚
       true-or-false A isPropA with (LEM A isPropA) 
@@ -170,9 +172,15 @@ module Ex315 {ℓ} (prop-resize : PropositionalResizing ℓ) where
  
   PropTr-univ-lift : ∀ {A B : Set (lsuc ℓ)} (f : A → B)
     → isProp B → PropTr A → B
-  PropTr-univ-lift {B = B} f isPropB x with (quasiinv.g prop-resize-quiv (B , isPropB))
-  PropTr-univ-lift {B = B} f isPropB x | lift (B' , isPropB') = transp {P = id} (ap proj₁ (quasiinv.f∘g prop-resize-quiv (B , isPropB)))
-                                                                                {!!}
+  PropTr-univ-lift {B = B} f isPropB x with (quasiinv.g prop-resize-quiv (B , isPropB)) |
+                                              inspect (quasiinv.g prop-resize-quiv) (B , isPropB)
+  PropTr-univ-lift {B = B} f isPropB x | lift (B' , isPropB') | [ eq ] = transp {P = id}
+                                                                         (ap proj₁ (quasiinv.f∘g prop-resize-quiv (B , isPropB)))
+                                                                         (transp {P = λ x → proj₁ (LiftP x)}
+                                                                                 (~ eq)
+                                                                                 (lift (x (B' , isPropB') ({!!} ∘ f))))
+                                                                       {-transp {P = id} (ap proj₁ (quasiinv.f∘g prop-resize-quiv (B , isPropB)))
+                                                                                (x {!!} {!!} {!!})-}
     {-where
       proj-eq : ∀ (B : Set (lsuc ℓ)) (isPropB : isProp B) →
         proj₁ ((LiftP ∘ quasiinv.g prop-resize-quiv) (B , isPropB)) ≡ Lift (lsuc ℓ)
@@ -192,9 +200,9 @@ module Ex321 {ℓ} (extensionality : funext-axiom {ℓ₁ = ℓ} {ℓ₂ = ℓ})
   
 
   isPropP→P≅∥P∥ : ∀ {P : Set ℓ} → isProp P → (P ≅ ∥ P ∥)
-  isPropP→P≅∥P∥ isPropP = ⟦_⟧ , (quasi-isequiv _ (record { g = λ x → ∥∥-rec id isPropP x ;
-                                                          g∘f = λ x → refl ;
-                                                          f∘g = λ x → ∥∥-ind {P = λ p → ⟦ ∥∥-rec id isPropP p ⟧ ≡ p}
+  isPropP→P≅∥P∥ isPropP = ⟦_⟧ , (quasi-isequiv (record { g = λ x → ∥∥-rec id isPropP x ;
+                                                        g∘f = λ x → refl ;
+                                                        f∘g = λ x → ∥∥-ind {P = λ p → ⟦ ∥∥-rec id isPropP p ⟧ ≡ p}
                                                                               (λ a → refl)
                                                                               (λ p → ∥∥-prop)
                                                                               x }))
@@ -204,9 +212,9 @@ module Ex321 {ℓ} (extensionality : funext-axiom {ℓ₁ = ℓ} {ℓ₂ = ℓ})
 
   isPropP≅P≅∥P∥ : ∀ {P : Set ℓ} → isProp P ≅ (P ≅ ∥ P ∥)
   isPropP≅P≅∥P∥ {P = P} = isPropP→P≅∥P∥ ,
-                 quasi-isequiv _ (record { g = P≅∥P∥→isPropP ;
-                                           g∘f = λ x → isProp-isProp {ℓ = ℓ} funext _ _ ;
-                                           f∘g = λ { (f , e) → isequiv.left (proj₂ Σ-paths) ((funext (λ x → ∥∥-prop _ _)) ,
+                 quasi-isequiv (record { g = P≅∥P∥→isPropP ;
+                                         g∘f = λ x → isProp-isProp {ℓ = ℓ} funext _ _ ;
+                                         f∘g = λ { (f , e) → isequiv.left (proj₂ Σ-paths) ((funext (λ x → ∥∥-prop _ _)) ,
                                                                                               isequiv-prop extensionality
                                                                                                            f
                                                                                                            _

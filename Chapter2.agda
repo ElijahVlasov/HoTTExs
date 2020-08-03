@@ -1,6 +1,7 @@
 module Chapter2 where
  
 open import prelude
+open import Inspect
 open import Sigma
 open import FunExt
 open import Equivalences
@@ -100,7 +101,7 @@ module Excercise10 {ℓ} {A : Set ℓ} (B : A → Set ℓ) (C : Σ A (λ x → B
   from∘to==id (x , (y , z)) = refl
 
   Σ-assoc : Σ A (λ x → Σ (B x) (λ y → C (x , y))) ≅ Σ (Σ A (λ x → B x)) (λ p → C p)
-  Σ-assoc = to , quasi-isequiv _ (record { g = from ; g∘f = from∘to==id ; f∘g = to∘from==id })
+  Σ-assoc = to , quasi-isequiv (record { g = from ; g∘f = from∘to==id ; f∘g = to∘from==id })
 
 module Excercise13 (extensionality : funext-axiom {ℓ₁ = lzero} {ℓ₂ = lzero} ) where
   private
@@ -118,27 +119,19 @@ module Excercise13 (extensionality : funext-axiom {ℓ₁ = lzero} {ℓ₂ = lze
   neg∘neg==id (inr x) = refl
 
   enum : 𝟚 → 𝟚 ≅ 𝟚
-  enum (inl tt) = id , quasi-isequiv _ (record { g = id ; g∘f = λ x → refl ; f∘g = λ x → refl })
-  enum (inr tt) = neg , quasi-isequiv _ (record { g = neg ; g∘f = neg∘neg==id ; f∘g = neg∘neg==id })
+  enum (inl tt) = id , quasi-isequiv (record { g = id ; g∘f = λ x → refl ; f∘g = λ x → refl })
+  enum (inr tt) = neg , quasi-isequiv (record { g = neg ; g∘f = neg∘neg==id ; f∘g = neg∘neg==id })
 
   ev0 : 𝟚 ≅ 𝟚 → 𝟚
   ev0 (x , y) = x (inl tt)
 
-  record Reveal_·_is_ {a b} {A : Set a} {B : A → Set b}
-                    (f : (x : A) → B x) (x : A) (y : B x) :
-                    Set (a ⊔ b) where
-    constructor [_]
-    field eq : f x ≡ y
-
-  inspect : ∀ {a b} {A : Set a} {B : A → Set b}
-          (f : (x : A) → B x) (x : A) → Reveal f · x is f x
-  inspect f x = [ refl ]
-
   enum∘ev0==id : enum ∘ ev0 == id
   enum∘ev0==id (f , e) with (f (inl tt)) | inspect f (inl tt)
-  enum∘ev0==id (f , e) | inl tt | [ eq ] = isequiv.left (proj₂ Σ-paths) ((funext (λ { (inl tt) → ~ eq ;
+  enum∘ev0==id (f , e) | inl tt | [ eq ] = isequiv.left (proj₂ Σ-paths) (funext (λ { (inl tt) → ~ eq ;
+                                                                                     (inr tt) → inrtt≡finrtt (~ eq) }) , (isequiv-prop extensionality f _ _))
+  {-isequiv.left (proj₂ Σ-paths) ((funext (λ { (inl tt) → ~ eq ;
                                                                                       (inr tt) → inrtt≡finrtt (~ eq)  })) ,
-                                                                         isequiv-prop extensionality f _ _ )
+                                                                         isequiv-prop extensionality f _ _ )-}
     where
       inrtt≡finrtt : inl tt ≡ f (inl tt) → inr tt ≡ f (inr tt)
       inrtt≡finrtt eq with (𝟚-decidable (f (inr tt)))
@@ -156,20 +149,8 @@ module Excercise13 (extensionality : funext-axiom {ℓ₁ = lzero} {ℓ₂ = lze
                                                                                         ∙ isequiv.right∘f e (inr tt))))
 
   𝟚≅𝟚≅𝟚 : 𝟚 ≅ (𝟚 ≅ 𝟚)
-  𝟚≅𝟚≅𝟚 = enum , quasi-isequiv _ (record { g = ev0 ;
-                                            g∘f = λ { (inl tt) → refl ;
+  𝟚≅𝟚≅𝟚 = enum , quasi-isequiv (record { g = ev0 ;
+                                          g∘f = λ { (inl tt) → refl ;
                                                       (inr tt) → refl } ;
-                                            f∘g = enum∘ev0==id })
-
-{-(λ { (inl x) → id , quasi-isequiv id (record { g = id ; g∘f = λ x → refl ; f∘g = λ x → refl }) ;
-                (inr x) → neg , (quasi-isequiv neg (record { g = neg ; g∘f = neg∘neg≡id ; f∘g = neg∘neg≡id })) }) ,
-           quasi-isequiv _ (record
-                             { g = λ { (x , y) → x (inl tt) } ;
-                               g∘f = λ { (inl tt) → refl ;
-                                         (inr tt) → refl } ;
-                               f∘g = λ { (x , y) → {!!} }
-                                     } )-}
---𝟚≅𝟚≅𝟚 = (λ { (inl x) → id , quasi-isequiv id (record { g = id ; g∘f = λ x → refl ; f∘g = λ x → refl }) ;
---                (inr x) → neg , quasi-isequiv neg (record { g = neg ; g∘f = λ x → neg∘neg≡id x ; f∘g = λ x → neg∘neg≡id x }) }) ,
---                                             record { left = {!!} ; f∘left = {!!} ; right = {!!} ; right∘f = {!!} }
-  
+                                          f∘g = enum∘ev0==id })
+                                            

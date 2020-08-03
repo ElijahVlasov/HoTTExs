@@ -15,6 +15,11 @@ LiftP {ℓ} (lift (A , isPropA)) = (Lift (lsuc ℓ) A) , (λ { (lift x) (lift y)
 PropositionalResizing : (ℓ : Level) → Set (lsuc (lsuc ℓ))
 PropositionalResizing ℓ = isequiv (LiftP {ℓ = ℓ})
 
+{-module FromHigherToLower (prop-resizing : ∀ {ℓ} → PropositionalResizing ℓ) where
+  from-higher-to-lower : ∀ {ℓ} {B : Set (lsuc ℓ)} → (isPropB : isProp B)
+    → B → proj₁ (unlift (isequiv.left (prop-resizing ) (B , isPropB)))
+  from-higher-to-lower {B = B} isPropB b = {!!}-}
+
 isProp-contractible-path-spaces : ∀ {ℓ} {A : Set ℓ} → isProp A
   → ∀ (x y : A) → isContr (x ≡ y)
 isProp-contractible-path-spaces {A = A} isPropA x y = record { center = isPropA x y ;
@@ -58,18 +63,25 @@ isProp-𝟙 (lift tt) (lift tt) = refl
 𝟙ₚ {ℓ = ℓ} = (Lift ℓ 𝟙) , isProp-𝟙
 
 inhab-prop≅𝟙 : ∀ {ℓ} {A : Set ℓ} → isProp A → A → A ≅ (Lift ℓ 𝟙)
-inhab-prop≅𝟙 isPropA a = (λ x → lift tt) , (quasi-isequiv _ (record { g = λ { (lift tt) → a} ;
+inhab-prop≅𝟙 isPropA a = (λ x → lift tt) , (quasi-isequiv (record { g = λ { (lift tt) → a} ;
                                                                        g∘f = λ x → isPropA _ _ ;
                                                                        f∘g = λ { (lift tt) → isProp-𝟙 _ _ } }) )
 inhab-prop≡𝟙 : ∀ {ℓ} {A : Set ℓ} → isUnivalent ℓ → isProp A → A → A ≡ (Lift ℓ 𝟙)
 inhab-prop≡𝟙 {ℓ = ℓ} {A = A} univalence isPropA a = isequiv.left (univalence A (Lift ℓ 𝟙)) (lift (inhab-prop≅𝟙 isPropA a))
 
 inhab-¬-prop≅𝕆 : ∀ {ℓ} {A : Set ℓ} → isProp A → (¬ A) → A ≅ (Lift ℓ 𝕆)
-inhab-¬-prop≅𝕆 isPropA a = a , (quasi-isequiv _ (record { g = λ { () } ; g∘f = λ x → isPropA _ _ ; f∘g = λ { () } }))
+inhab-¬-prop≅𝕆 isPropA a = a , (quasi-isequiv (record { g = λ { () } ; g∘f = λ x → isPropA _ _ ; f∘g = λ { () } }))
 
 inhab-¬-prop≡𝕆 : ∀ {ℓ} {A : Set ℓ} → isUnivalent ℓ → isProp A → (¬ A) → A ≡ (Lift ℓ 𝕆)
 inhab-¬-prop≡𝕆 {ℓ = ℓ} {A = A} univalence isPropA a = isequiv.left (univalence A (Lift ℓ 𝕆)) (lift (inhab-¬-prop≅𝕆 isPropA a))
 
+module ∀-prop-proof (funext : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂} {f g : ∀ a → P a}
+                                                       → (∀ (x : A) → f x ≡ g x) → f ≡ g) where
+  ∀-prop : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂}
+    → isProp A → (∀ (a : A) → isProp (P a)) → isProp (∀ a → P a)
+  ∀-prop isPropA isPropPa f g = funext λ a → isPropPa a _ _
+
+open ∀-prop-proof public
 
 module PropTrunc where
   private
@@ -95,6 +107,10 @@ module PropTrunc where
     ∥∥-prop : ∀ {ℓ} {A : Set ℓ} → isProp A 
 
 open PropTrunc public
+
+∥∥-ind' : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : ∥ A ∥ → Set ℓ₂}
+    → (∀ (a : A) → P ⟦ a ⟧) → (∀ (x : ∥ A ∥) → isProp (P x)) → ∀ (x : ∥ A ∥) → P x
+∥∥-ind' {A = A} {P = P} Pa isPropPx x = ∥∥-rec (λ a → transp {P = P} (∥∥-prop ⟦ a ⟧ x) (Pa a)) (isPropPx x) x
 
 _∨_ : ∀ {ℓ} → Set ℓ → Set ℓ → Set ℓ
 A ∨ B = ∥ A ⊎ B ∥
@@ -123,3 +139,4 @@ isContr-× isContrA isContrB = isProp-inhabited-isContr (isProp-× (isContr-isPr
                                                        ((isContr.center isContrA) , (isContr.center isContrB))
 isContr-any-center : ∀ {ℓ} {A : Set ℓ} → isContr A → (a : A) → ∀ (x : A) → a ≡ x
 isContr-any-center isContrA a x = (~ isContr.contr isContrA a) ∙ isContr.contr isContrA x
+
